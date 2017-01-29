@@ -57,7 +57,6 @@ class App extends React.Component {
       info: Object.assign({}, quote, poster),
       currentBgColor: this.state.nextBgColor,
       nextBgColor: this.randomColor(),
-      second_loaded: true
     })
 
     this.state.bg.setValue(0);
@@ -158,32 +157,36 @@ class App extends React.Component {
   }
 
   _renderImage() {
-    Animated.parallel([
+    const animation = Animated.parallel([
       Animated.timing(this.state.revertOpacity, {
         toValue: 0,
-        duration: ANIM_TIME
+        duration: ANIM_TIME,
+        useNativeDriver: true
       }),
       Animated.timing(this.state.opacity, {
         toValue: 1,
-        duration: ANIM_TIME
+        duration: ANIM_TIME,
+        useNativeDriver: true
       })
-    ]).start()
+    ])
 
     // Alert.alert('asd', JSON.stringify(this.state.info))
     return <Animated.View style={{flex: 1, width: width, height: height, overflow: 'hidden'}}>
       <Animated.Image
-        source={{uri: this.state.info.oldPoster}}
-        style={[styles.backgroundImage, styles.full, {opacity: this.state.revertOpacity, position: 'absolute', zIndex: 2}]}
-      />
-      <Animated.Image
         source={{uri: this.state.info.poster}}
-        style={[styles.backgroundImage, styles.full, {opacity: this.state.opacity}]}
+        style={[styles.backgroundImage, styles.full, {opacity: this.state.opacity, position: 'absolute', zIndex: 2}]}
         onLoad={() => {
-          this.setState({loaded: true})
-
+          this.setState({loaded: true}, () => {
+            // Alert.alert('Dowloaded')
+            animation.start()
+          })
           this.state.revertOpacity.setValue(1)
           this.state.opacity.setValue(0)
         }}
+      />
+      <Animated.Image
+        source={{uri: this.state.info.oldPoster}}
+        style={[styles.backgroundImage, styles.full, {opacity: this.state.revertOpacity}]}
       />
     </Animated.View>
   }
